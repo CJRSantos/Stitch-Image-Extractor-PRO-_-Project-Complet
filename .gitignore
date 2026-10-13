@@ -1,0 +1,5 @@
+.DS_Store
+Thumbs.db
+*.log
+create_test_zip.ps1
+package_gumroad.ps1

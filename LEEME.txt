@@ -1,0 +1,37 @@
+========================================================================
+           STITCH IMAGE EXTRACTOR PRO - GUÍA DE INICIO RÁPIDO
+========================================================================
+
+¡Gracias por adquirir Stitch Image Extractor PRO!
+
+Esta herramienta resuelve de raíz el molesto problema de Google Stitch AI:
+desanida automáticamente todas las carpetas complejas de tu archivo ZIP 
+y te muestra una galería limpia con todas tus imágenes listas para usar.
+
+------------------------------------------------------------------------
+CÓMO USAR LA APLICACIÓN (EN 3 PASOS)
+------------------------------------------------------------------------
+1. Haz doble clic en el archivo "Iniciar_Extractor.bat" (o abre "index.html"
+   directamente en tu navegador favorito: Chrome, Edge, Safari, Firefox).
+
+2. Arrastra tu archivo .ZIP descargado de Google Stitch AI hacia la zona 
+   punteada de la aplicación (o haz clic en "Seleccionar archivo ZIP").
+
+3. ¡Listo! Verás instantáneamente todas tus imágenes organizadas:
+   - Descarga individual: Haz clic en el botón "Descargar" de cualquier diseño.
+   - Selección personalizada: Marca las casillas de las imágenes que te gusten.
+   - Guardar en Carpeta: Pulsa "Guardar Sueltas en Carpeta" para descargarlas sin comprimir.
+   - Descargar ZIP Limpio: Pulsa "Descargar ZIP Limpio" para obtener un ZIP 100% 
+     plano sin subcarpetas anidadas.
+
+------------------------------------------------------------------------
+VENTAJAS Y PRIVACIDAD
+------------------------------------------------------------------------
+✓ 100% Privado y Seguro: Todo el procesamiento ocurre en la memoria de tu
+  ordenador. Ningún diseño se sube a internet.
+✓ Funciona Sin Conexión: Puedes usarlo sin estar conectado a internet.
+✓ Anti-Sobrescritura: Si Stitch genera diseños con el mismo nombre en
+  diferentes carpetas, el sistema los renombra inteligentemente (ej. diseño_1.png)
+  para que nunca pierdas ningún archivo.
+
+Soporte y contacto: Si tienes cualquier consulta, contáctanos a través de Gumroad.

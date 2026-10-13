@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stitch Image Extractor PRO - Extrae solo imágenes de Google Stitch AI</title>
+  <meta name="description" content="Extrae automáticamente y aplana todas las imágenes de los archivos ZIP de Google Stitch AI. Sin carpetas anidadas, con vista previa y descarga selectiva.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-grid-pattern"></div>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v12h16V6H4zm3 8.5 3-3.86 2.14 2.57 3.43-4.29L19 14.5H7zM8.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Stitch Image Extractor <span class="pro-badge">PRO</span></h1>
+          <p>Extractor directo & desanidador para Google Stitch AI</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <div class="chip-tag">
+          <span class="dot"></span>
+          <span>100% Local y Privado</span>
+        </div>
+        <div class="chip-tag" title="Funciona sin conexión a internet">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+          <span>Offline Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Box -->
+    <section class="hero-box">
+      <h2>Descarga tus diseños de Stitch <span class="hero-highlight">sin carpetas infinitas</span></h2>
+      <p>Arrastra tu archivo ZIP de Stitch AI. Extraemos instantáneamente todas las imágenes a una galería limpia para que selecciones cuáles descargar o te las lleves todas sueltas con 1 clic.</p>
+    </section>
+
+    <!-- Dropzone Area -->
+    <section class="dropzone-card" id="dropzoneCard">
+      <input type="file" id="fileInput" accept=".zip" style="display: none;">
+      <div class="dropzone-inner">
+        <div class="drop-icon-sphere">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          </svg>
+        </div>
+        <div class="drop-title">Arrastra tu archivo .ZIP de Stitch aquí</div>
+        <div class="drop-subtitle">O haz clic para explorar tus archivos. Soporta ZIPs con cientos de carpetas anidadas.</div>
+        <div class="drop-browse-btn" id="browseBtn">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Seleccionar archivo ZIP</span>
+        </div>
+        <div class="drop-features-pill">
+          <span class="feature-tag">✨ Detección automática PNG, JPG, WebP, SVG</span>
+          <span class="feature-tag">🛡️ Anti-sobrescritura inteligente</span>
+          <span class="feature-tag">⚡ Procesamiento en memoria ultra-rápido</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Extraction Progress Card -->
+    <section class="progress-card" id="progressCard">
+      <div class="progress-header">
+        <div class="progress-title">
+          <div class="spinner"></div>
+          <span id="progressText">Desanidando y extrayendo imágenes...</span>
+        </div>
+        <span id="progressPercent" style="font-weight: 700; color: var(--accent-secondary);">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+    </section>
+
+    <!-- Workspace & Gallery Section -->
+    <section class="workspace-section" id="workspaceSection">
+      <!-- Toolbar -->
+      <div class="control-toolbar">
+        <div class="stats-group">
+          <div class="stat-pill">
+            <span>Encontradas:</span>
+            <strong id="statTotalCount">0</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Seleccionadas:</span>
+            <strong id="statSelectedCount" style="color: var(--accent-secondary);">0</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Peso total:</span>
+            <strong id="statTotalSize">0 MB</strong>
+          </div>
+
+          <div class="selection-toggle-btns">
+            <button class="btn-secondary" id="btnSelectAll" title="Seleccionar todas las imágenes">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>Todas</span>
+            </button>
+            <button class="btn-secondary" id="btnDeselectAll" title="Desmarcar todas">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              <span>Ninguna</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="actions-group">
+          <!-- Download Loose Files -->
+          <button class="btn-primary btn-cyan" id="btnDownloadLoose" title="Guardar directamente las imágenes como archivos sueltos a una carpeta">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            </svg>
+            <span>Guardar Sueltas en Carpeta</span>
+          </button>
+
+          <!-- Download Clean Flat ZIP -->
+          <button class="btn-primary" id="btnDownloadCleanZip" title="Descargar las seleccionadas en un único archivo ZIP plano sin subcarpetas">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span>Descargar ZIP Limpio</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="filter-toolbar">
+        <div class="search-input-box">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Filtrar por nombre de imagen...">
+        </div>
+
+        <div class="filter-pills" id="filterPillsContainer">
+          <button class="filter-pill-btn active" data-filter="all">Todos los formatos</button>
+          <button class="filter-pill-btn" data-filter="png">PNG</button>
+          <button class="filter-pill-btn" data-filter="jpg">JPG / JPEG</button>
+          <button class="filter-pill-btn" data-filter="webp">WebP</button>
+          <button class="filter-pill-btn" data-filter="svg">SVG</button>
+        </div>
+      </div>
+
+      <!-- Image Grid -->
+      <div class="image-grid" id="imageGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox-modal" id="lightboxModal">
+      <div class="lightbox-content">
+        <button class="lightbox-close-btn" id="lightboxCloseBtn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="lightbox-image-box">
+          <img id="lightboxImg" src="" alt="Vista previa de diseño Stitch">
+        </div>
+        <div class="lightbox-toolbar">
+          <span class="lightbox-info" id="lightboxFileName">Diseño.png</span>
+          <span class="image-format-badge" id="lightboxDimBadge">1920x1080</span>
+          <button class="btn-primary" id="lightboxDownloadBtn" style="padding: 6px 14px; font-size: 0.82rem;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Descargar Esta Imagen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commercial Features Banner / Footer -->
+    <footer class="commercial-footer">
+      <div class="feature-benefit">
+        <div class="feature-benefit-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="feature-benefit-text">
+          <h3>Elimina el Laberinto de Carpetas</h3>
+          <p>Convierte horas de entrar a carpetas anidadas en un solo clic. Todas tus imágenes aplanadas y listas para usar.</p>
+        </div>
+      </div>
+
+      <div class="feature-benefit">
+        <div class="feature-benefit-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="feature-benefit-text">
+          <h3>Anti-Sobrescritura Inteligente</h3>
+          <p>Si Stitch nombra varias imágenes con el mismo nombre en carpetas distintas, el sistema añade un sufijo para no perder ningún archivo.</p>
+        </div>
+      </div>
+
+      <div class="feature-benefit">
+        <div class="feature-benefit-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div class="feature-benefit-text">
+          <h3>100% Seguro y Privado</h3>
+          <p>Tus diseños nunca viajan por internet. El procesamiento se ejecuta íntegramente en la memoria de tu computadora.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="jszip.min.js"></script>
+  <script src="FileSaver.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
