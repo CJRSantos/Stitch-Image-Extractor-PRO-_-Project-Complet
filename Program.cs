@@ -1,139 +1,143 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace StitchImageExtractorPro
 {
     static class Program
     {
-        private static HttpListener listener;
-        private static int port;
-        private static bool isRunning = true;
-
         [STAThread]
         static void Main()
         {
             try
             {
-                // Find an available port
-                TcpListener tcp = new TcpListener(IPAddress.Loopback, 0);
-                tcp.Start();
-                port = ((IPEndPoint)tcp.LocalEndpoint).Port;
-                tcp.Stop();
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string appDir = Path.Combine(localAppData, "StitchImageExtractorPRO", "app");
+                if (!Directory.Exists(appDir))
+                {
+                    Directory.CreateDirectory(appDir);
+                }
 
-                // Start HttpListener on localhost
-                listener = new HttpListener();
-                listener.Prefixes.Add("http://127.0.0.1:" + port + "/");
-                listener.Start();
+                // Extract embedded assets to local app directory
+                Assembly asm = Assembly.GetExecutingAssembly();
+                string[] resources = new string[] {
+                    "index.html",
+                    "styles.css",
+                    "app.js",
+                    "jszip.min.js",
+                    "FileSaver.min.js",
+                    "jspdf.umd.min.js",
+                    "app.ico"
+                };
 
-                // Start background HTTP thread
-                Thread serverThread = new Thread(ListenLoop);
-                serverThread.IsBackground = true;
-                serverThread.Start();
+                foreach (string res in resources)
+                {
+                    string targetFile = Path.Combine(appDir, res);
+                    using (Stream stream = asm.GetManifestResourceStream(res))
+                    {
+                        if (stream != null)
+                        {
+                            using (FileStream fs = new FileStream(targetFile, FileMode.Create, FileAccess.Write))
+                            {
+                                byte[] buf = new byte[16384];
+                                int read;
+                                while ((read = stream.Read(buf, 0, buf.Length)) > 0)
+                                {
+                                    fs.Write(buf, 0, read);
+                                }
+                            }
+                        }
+                    }
+                }
 
-                // Locate Edge or Chrome
+                // Register Windows Start Menu & Desktop Shortcuts so the app appears in Windows Search
+                string currentExePath = Assembly.GetExecutingAssembly().Location;
+                string iconPath = Path.Combine(appDir, "app.ico");
+                if (!File.Exists(iconPath))
+                {
+                    iconPath = currentExePath;
+                }
+
+                RegisterShortcuts(currentExePath, iconPath);
+
+                // Launch in clean Standalone App Window (Edge / Chrome)
                 string edgePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Microsoft\Edge\Application\msedge.exe");
                 if (!File.Exists(edgePath))
                 {
                     edgePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Microsoft\Edge\Application\msedge.exe");
                 }
 
-                string profileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StitchImageExtractorPRO", "Profile");
-                if (!Directory.Exists(profileDir))
-                {
-                    Directory.CreateDirectory(profileDir);
-                }
+                string htmlFile = Path.Combine(appDir, "index.html");
+                string fileUri = new Uri(htmlFile).AbsoluteUri;
+                string profileDir = Path.Combine(localAppData, "StitchImageExtractorPRO", "profile");
 
-                string appUrl = "http://127.0.0.1:" + port + "/";
-
-                Process browserProc = null;
                 if (File.Exists(edgePath))
                 {
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = edgePath;
-                    psi.Arguments = string.Format("--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1300,860", appUrl, profileDir);
+                    psi.Arguments = string.Format("--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1300,860", fileUri, profileDir);
                     psi.UseShellExecute = false;
-                    browserProc = Process.Start(psi);
+                    Process.Start(psi);
                 }
                 else
                 {
-                    Process.Start(new ProcessStartInfo(appUrl) { UseShellExecute = true });
-                }
-
-                if (browserProc != null)
-                {
-                    browserProc.WaitForExit();
-                }
-                else
-                {
-                    Thread.Sleep(Timeout.Infinite);
+                    // Fallback to default browser
+                    Process.Start(new ProcessStartInfo(fileUri) { UseShellExecute = true });
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error iniciando Stitch Image Extractor PRO: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
-            {
-                isRunning = false;
-                if (listener != null && listener.IsListening)
-                {
-                    listener.Stop();
-                }
-            }
         }
 
-        private static void ListenLoop()
+        private static void RegisterShortcuts(string targetExe, string iconPath)
         {
-            Assembly asm = Assembly.GetExecutingAssembly();
-            while (isRunning)
+            try
             {
-                try
-                {
-                    HttpListenerContext context = listener.GetContext();
-                    string path = context.Request.Url.AbsolutePath.TrimStart('/');
-                    if (string.IsNullOrEmpty(path)) path = "index.html";
+                string startMenu = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    @"Microsoft\Windows\Start Menu\Programs\Stitch Image Extractor PRO.lnk"
+                );
+                string desktop = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                    "Stitch Image Extractor PRO.lnk"
+                );
 
-                    string contentType = "application/octet-stream";
-                    if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase)) contentType = "text/html; charset=utf-8";
-                    else if (path.EndsWith(".css", StringComparison.OrdinalIgnoreCase)) contentType = "text/css; charset=utf-8";
-                    else if (path.EndsWith(".js", StringComparison.OrdinalIgnoreCase)) contentType = "application/javascript; charset=utf-8";
-                    else if (path.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) contentType = "image/png";
-                    else if (path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) contentType = "image/jpeg";
-                    else if (path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)) contentType = "image/svg+xml";
+                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
+                if (shellType == null) return;
+                dynamic shell = Activator.CreateInstance(shellType);
 
-                    Stream stream = asm.GetManifestResourceStream(path);
-                    if (stream != null)
-                    {
-                        context.Response.ContentType = contentType;
-                        context.Response.ContentLength64 = stream.Length;
-                        context.Response.Headers.Add("Cache-Control", "no-cache");
-                        byte[] buffer = new byte[16384];
-                        int read;
-                        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            context.Response.OutputStream.Write(buffer, 0, read);
-                        }
-                        stream.Close();
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = 404;
-                        byte[] notFound = Encoding.UTF8.GetBytes("Not found");
-                        context.Response.OutputStream.Write(notFound, 0, notFound.Length);
-                    }
-                    context.Response.OutputStream.Close();
-                }
-                catch
+                // Start Menu shortcut (indexed by Windows Search)
+                dynamic scStart = shell.CreateShortcut(startMenu);
+                scStart.TargetPath = targetExe;
+                scStart.WorkingDirectory = Path.GetDirectoryName(targetExe);
+                if (File.Exists(iconPath))
                 {
-                    if (!isRunning) break;
+                    scStart.IconLocation = iconPath + ",0";
                 }
+                scStart.Description = "Stitch Image Extractor PRO - Extrae imágenes y crea PDFs limpios";
+                scStart.Save();
+
+                // Desktop shortcut
+                if (!File.Exists(desktop))
+                {
+                    dynamic scDesk = shell.CreateShortcut(desktop);
+                    scDesk.TargetPath = targetExe;
+                    scDesk.WorkingDirectory = Path.GetDirectoryName(targetExe);
+                    if (File.Exists(iconPath))
+                    {
+                        scDesk.IconLocation = iconPath + ",0";
+                    }
+                    scDesk.Description = "Stitch Image Extractor PRO";
+                    scDesk.Save();
+                }
+            }
+            catch
+            {
+                // Silently continue if shortcut creation is restricted by policy
             }
         }
     }
