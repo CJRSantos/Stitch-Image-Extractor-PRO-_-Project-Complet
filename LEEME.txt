@@ -11,27 +11,32 @@ y te muestra una galería limpia con todas tus imágenes listas para usar.
 ------------------------------------------------------------------------
 CÓMO USAR LA APLICACIÓN (EN 3 PASOS)
 ------------------------------------------------------------------------
-1. Haz doble clic en el archivo "Iniciar_Extractor.bat" (o abre "index.html"
-   directamente en tu navegador favorito: Chrome, Edge, Safari, Firefox).
+1. Haz doble clic en el archivo:
+   👉 "Stitch Image Extractor PRO.exe"
+   (No requiere instalación, abre al instante como aplicación de escritorio).
+
+   *Nota para usuarios de Mac/Linux: En la carpeta "Version_Web_Multiplataforma" 
+   puedes abrir "index.html" directamente en tu navegador favorito.*
 
 2. Arrastra tu archivo .ZIP descargado de Google Stitch AI hacia la zona 
    punteada de la aplicación (o haz clic en "Seleccionar archivo ZIP").
 
 3. ¡Listo! Verás instantáneamente todas tus imágenes organizadas:
-   - Descarga individual: Haz clic en el botón "Descargar" de cualquier diseño.
-   - Selección personalizada: Marca las casillas de las imágenes que te gusten.
-   - Guardar en Carpeta: Pulsa "Guardar Sueltas en Carpeta" para descargarlas sin comprimir.
+   - Convertir a PDF: Pulsa "Convertir a PDF" para compilar todas o las 
+     pantallas seleccionadas en un documento PDF limpio y nítido.
    - Descargar ZIP Limpio: Pulsa "Descargar ZIP Limpio" para obtener un ZIP 100% 
      plano sin subcarpetas anidadas.
+   - Guardar en Carpeta: Pulsa "Guardar Sueltas en Carpeta" para descargarlas sin comprimir.
+   - Descarga individual: Haz clic en el botón "Descargar" de cualquier diseño.
 
 ------------------------------------------------------------------------
 VENTAJAS Y PRIVACIDAD
 ------------------------------------------------------------------------
 ✓ 100% Privado y Seguro: Todo el procesamiento ocurre en la memoria de tu
   ordenador. Ningún diseño se sube a internet.
-✓ Funciona Sin Conexión: Puedes usarlo sin estar conectado a internet.
+✓ Funciona Sin Conexión (Offline): No requiere conexión a internet.
 ✓ Anti-Sobrescritura: Si Stitch genera diseños con el mismo nombre en
-  diferentes carpetas, el sistema los renombra inteligentemente (ej. diseño_1.png)
+  diferentes carpetas, el sistema los renombra inteligentemente (ej. mockup_1.png)
   para que nunca pierdas ningún archivo.
 
 Soporte y contacto: Si tienes cualquier consulta, contáctanos a través de Gumroad.
