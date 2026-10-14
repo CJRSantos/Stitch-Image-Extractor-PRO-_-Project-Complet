@@ -32,6 +32,7 @@ const statTotalSize = document.getElementById('statTotalSize');
 // Action Buttons
 const btnSelectAll = document.getElementById('btnSelectAll');
 const btnDeselectAll = document.getElementById('btnDeselectAll');
+const btnDownloadPdf = document.getElementById('btnDownloadPdf');
 const btnDownloadCleanZip = document.getElementById('btnDownloadCleanZip');
 const btnDownloadLoose = document.getElementById('btnDownloadLoose');
 
@@ -113,6 +114,7 @@ function setupEventListeners() {
   btnDeselectAll.addEventListener('click', () => setAllSelection(false));
 
   // Export buttons
+  if (btnDownloadPdf) btnDownloadPdf.addEventListener('click', exportCleanPdf);
   btnDownloadCleanZip.addEventListener('click', exportCleanZip);
   btnDownloadLoose.addEventListener('click', exportLooseFiles);
 
@@ -436,6 +438,7 @@ function updateStats() {
 
   // Enable/disable export buttons based on selection
   const hasSelection = selectedCount > 0;
+  if (btnDownloadPdf) btnDownloadPdf.disabled = !hasSelection;
   btnDownloadCleanZip.disabled = !hasSelection;
   btnDownloadLoose.disabled = !hasSelection;
 }
@@ -572,6 +575,105 @@ async function exportLooseFiles() {
     downloadSingleImage(img);
     // Slight delay to prevent browser download throttling
     await new Promise(r => setTimeout(r, 220));
+  }
+}
+
+/**
+ * Prepares an image for high-resolution, uncompressed inclusion in PDF
+ */
+function prepareImageForPdf(imgItem) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const width = img.naturalWidth || img.width || 1200;
+        const height = img.naturalHeight || img.height || 800;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // Clean white background for pristine presentation
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        resolve({
+          dataUrl,
+          width,
+          height,
+          filename: imgItem.filename
+        });
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${imgItem.filename}`));
+    img.src = imgItem.blobUrl;
+  });
+}
+
+/**
+ * Converts all selected images into a clean, single PDF document
+ */
+async function exportCleanPdf() {
+  const selected = state.images.filter(i => i.selected);
+  if (selected.length === 0) {
+    alert('Por favor selecciona al menos una imagen para convertir a PDF.');
+    return;
+  }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('La biblioteca de generación de PDF no está cargada.');
+    return;
+  }
+
+  btnDownloadPdf.disabled = true;
+  const originalHtml = btnDownloadPdf.innerHTML;
+  btnDownloadPdf.innerHTML = `
+    <div class="spinner" style="width: 14px; height: 14px;"></div>
+    <span>Convirtiendo a PDF...</span>
+  `;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    let doc = null;
+
+    for (let i = 0; i < selected.length; i++) {
+      const spanEl = btnDownloadPdf.querySelector('span');
+      if (spanEl) {
+        spanEl.textContent = `Página ${i + 1} de ${selected.length}...`;
+      }
+
+      const prepared = await prepareImageForPdf(selected[i]);
+      const orientation = prepared.width > prepared.height ? 'landscape' : 'portrait';
+
+      if (i === 0) {
+        doc = new jsPDF({
+          orientation: orientation,
+          unit: 'px',
+          format: [prepared.width, prepared.height],
+          hotfixes: ['px_scaling']
+        });
+        doc.addImage(prepared.dataUrl, 'JPEG', 0, 0, prepared.width, prepared.height);
+      } else {
+        doc.addPage([prepared.width, prepared.height], orientation);
+        doc.addImage(prepared.dataUrl, 'JPEG', 0, 0, prepared.width, prepared.height);
+      }
+    }
+
+    const outputName = `${state.currentZipName}_Limpio.pdf`;
+    doc.save(outputName);
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    alert('Error al generar el archivo PDF: ' + err.message);
+  } finally {
+    btnDownloadPdf.disabled = false;
+    btnDownloadPdf.innerHTML = originalHtml;
   }
 }
 
